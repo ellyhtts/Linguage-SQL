@@ -1,32 +1,121 @@
-# Modelagem de Dados e Consultas Avançadas
+# Guia Avançado: Modelagem e Consultas SQL
 
-## 1. Chaves Estrangeiras (Foreign Keys)
-[cite_start]A chave estrangeira é um campo de uma tabela que aponta para a chave primária de outra tabela[cite: 36]. [cite_start]Ela serve para criar relacionamento entre tabelas[cite: 37]. [cite_start]Em outras palavras, a chave estrangeira é o que “liga” uma tabela à outra em um banco de dados relacional[cite: 39].
+## 1. Relacionamentos: O Poder das Chaves Estrangeiras
 
-A utilização dessas chaves é fundamental para a arquitetura do banco:
-* [cite_start]Sem chave estrangeira, as tabelas ficam isoladas e não há garantia de que os dados combinam, podendo existir registros “órfãos” (sem relação real)[cite: 41, 42, 43, 44].
-* [cite_start]Com chave estrangeira, o banco garante integridade dos dados e evita erros e inconsistências[cite: 45, 46, 47]. 
-* [cite_start]Ela representa relações do mundo real, como um cliente e seu pedido[cite: 48].
+[cite_start] A chave estrangeira (Foreign Key) é um campo de uma tabela que aponta para a chave primária de outra tabela [cite: 34, 35, 36].
+[cite_start] Ela serve para criar relacionamento entre tabelas, sendo o elemento que “liga” uma tabela à outra em um banco de dados relacional [cite: 37, 38, 39].
 
-## 2. Normalização
-[cite_start]Normalizar um banco de dados é organizar as informações para que cada dado exista apenas uma vez, evitando repetição, erros e bagunça nas tabelas[cite: 72]. O processo é dividido em formas normais:
+**Por que precisamos dela?**
 
-* [cite_start]**Primeira Forma Normal (1FN):** Os campos devem ser atômicos, ou seja, possuir um único valor por célula[cite: 100, 101].
-* [cite_start]**Segunda Forma Normal (2FN):** Deve estar na 1FN e remover dependências parciais[cite: 143, 144]. [cite_start]Cada entidade passa a ter sua própria tabela e ter sua própria chave primária[cite: 145].
-* [cite_start]**Terceira Forma Normal (3FN):** Deve estar na 2FN e remover dependências transitivas[cite: 188, 189]. [cite_start]Campos não-chave devem depender apenas da chave[cite: 190].
+Sem chave estrangeira:
+* [cite_start] As tabelas ficam isoladas[cite: 41, 42].
+* [cite_start] Não há garantia de que os dados combinam[cite: 43].
+* [cite_start] Podem existir registros “órfãos” (sem relação real)[cite: 44].
 
-[cite_start]O resultado da normalização é um banco de dados com ausência de redundância e relacionamentos claros através de chaves estrangeiras[cite: 242, 243]. [cite_start]Isso torna o banco de dados mais eficiente, mais confiável e de manutenção facilitada[cite: 246, 248, 249].
+Com chave estrangeira:
+* [cite_start] O banco garante integridade dos dados [cite: 45, 46].
+* [cite_start] Evita erros e inconsistências[cite: 47].
+* [cite_start] Representa relações do mundo real (cliente → pedido, aluno → matrícula, etc.)[cite: 48].
 
-## 3. Consultas Avançadas: JOINS
-[cite_start]Conectamos tabelas lateralmente através de uma coluna comum (Chave) utilizando Joins para adição horizontal de colunas[cite: 3, 4].
-* [cite_start]**Inner Join:** Retorna apenas o que existe em ambas as tabelas[cite: 5].
-* [cite_start]**Left Join:** Mantemos tudo da tabela à esquerda e trazemos o que houver da direita[cite: 6].
-* [cite_start]**Right Join:** Mantemos tudo da direita e trazemos o que houver da esquerda[cite: 7].
-* [cite_start]**Full Join:** Trazemos tudo de ambos os lados, independentemente de haver correspondência[cite: 8].
+**Exemplo Prático (Visão de Tabelas):**
 
-## 4. Consultas Avançadas: Operadores SET
-[cite_start]Para adição vertical de linhas, empilhamos resultados de consultas diferentes, desde que tenham a mesma estrutura de colunas[cite: 16, 17]:
-* [cite_start]**UNION:** Combina os resultados e remove duplicados[cite: 18].
-* [cite_start]**UNION ALL:** Combina tudo, incluindo duplicados, e é mais rápido[cite: 19].
-* [cite_start]**EXCEPT / MINUS:** Mostra o que existe no primeiro conjunto mas não no segundo[cite: 20].
-* [cite_start]**INTERSECT:** Mostra apenas o que é comum a ambos os conjuntos[cite: 21].
+[cite_start] **Tabela de Clientes** [cite: 49]
+| Id (PK) | Nome |
+|:---:|:---|
+| 1 | [cite_start]Ana Silva [cite: 52, 53] |
+| 2 | [cite_start]João Souza [cite: 54, 55] |
+
+[cite_start] **Tabela de Pedidos** [cite: 56]
+| Id (PK) | clienteId (FK) | Total |
+|:---:|:---:|:---:|
+| 1001 | 1 | [cite_start]3500 [cite: 60, 61, 62] |
+| 1002 | 2 | [cite_start]200 [cite: 63, 64, 65] |
+| 1003 | 1 | [cite_start]1200 [cite: 66, 67, 68] |
+
+**Exemplo em Código (DDL):**
+```sql
+CREATE TABLE Pedidos (
+    id INT PRIMARY KEY,
+    clienteId INT,
+    Total DECIMAL(10,2),
+    -- Criando a amarra entre as duas tabelas
+    CONSTRAINT fk_cliente_pedido FOREIGN KEY (clienteId) REFERENCES Clientes(id)
+);
+```
+
+## 2. Normalização: A Arte da Organização
+
+Normalizar um banco de dados é organizar as informações para que cada dado exista apenas uma vez, evitando repetição, erros e bagunça nas tabelas. O processo é dividido em etapas conhecidas como Formas Normais:
+
+### Forma Não Normalizada (UNF)
+Todos os dados estão misturados em uma única tabela, com grupos repetidos. Dados do cliente repetidos tornam difícil consultar e manter.
+
+| OrderID | CustomerName | CustomerPhone | Products | Total |
+| :---: | :--- | :--- | :--- | :---: |
+| 1001 | Ana Silva | 9999-1111 | Notebook, Mouse | 3500 |
+
+### Primeira Forma Normal (1FN)
+
+* **Regra:** Os campos devem ser atômicos (um único valor por célula).
+* **Problema restante:** Os dados do cliente continuam duplicados e o total pertence apenas ao pedido, mantendo responsabilidades misturadas na mesma tabela.
+
+| OrderID | CustomerName | CustomerPhone | Product | Total |
+| :---: | :--- | :--- | :--- | :---: |
+| 1001 | Ana Silva | 9999-1111 | Notebook | 3500 |
+| 1001 | Ana Silva | 9999-1111 | Mouse | 3500 |
+
+### Segunda Forma Normal (2FN)
+
+* **Regras:** Deve estar na 1FN e removermos dependências parciais. Cada entidade passa a ter sua própria tabela e ter sua própria chave primária.
+
+**Tabela Customers** | CustomerID | Nome | Telefone |
+|:---:|:---|:---|
+| 1 | Ana Silva | 9999-1111  |
+
+**Tabela Orders** | OrderID | CustomerID | Total |
+|:---:|:---:|:---:|
+| 1001 | 1 | 3500  |
+
+**Tabela Order_Products (Itens)** | OrderID | Produto |
+|:---:|:---|
+| 1001 | Notebook  |
+| 1001 | Mouse  |
+
+* **Problema restante:** "Produto" é um texto livre, está "solto" no banco.
+
+### Terceira Forma Normal (3FN)
+
+* **Regras:** Deve estar na 2FN. Remover dependências transitivas. Campos não-chave DEVEM depender apenas da chave. Criamos uma tabela exclusiva para Produtos e a referenciamos por ID.
+
+**Tabela Products** | ProductID | NomeProduto |
+|:---:|:---|
+| 10 | Notebook  |
+| 11 | Mouse  |
+
+**O Resultado Final:** O banco de dados agora possui ausência de redundância, relacionamentos claros (Chaves Estrangeiras) e estrutura relacional correta. Mais eficiente, confiável, fácil de escalar e de entender.
+
+---
+
+## 3. JOINS: Adição de Colunas (Combinação Horizontal)
+
+Conectamos tabelas lateralmente através de uma coluna comum (Chave). Ao escrevermos um JOIN, devemos especificar a relação.
+
+* **Inner Join:** Apenas o que existe em ambas as tabelas.
+* **Left Join:** Mantemos tudo da tabela à esquerda e trazemos o que houver da direita.
+* **Right Join:** Mantemos tudo da direita e trazemos o que houver da esquerda.
+* **Full Join:** Trazemos tudo de ambos os lados, independentemente de haver correspondência.
+
+**Exemplos Práticos em Código:**
+
+```sql
+-- 1. INNER JOIN: Mostra apenas clientes que fizeram pedidos
+SELECT c.Nome, p.Total 
+FROM Clientes c
+INNER JOIN Pedidos p ON c.Id = p.clienteId;
+
+-- 2. LEFT JOIN: Mostra TODOS os clientes, mesmo os que NÃO fizeram pedidos (o Total virá como NULL)
+SELECT c.Nome, p.Total 
+FROM Clientes c
+LEFT JOIN Pedidos p ON c.Id = p.clienteId;
+
+``
