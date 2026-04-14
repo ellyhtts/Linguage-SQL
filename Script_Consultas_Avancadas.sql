@@ -1,10 +1,8 @@
--- 1. LIMPEZA DE ESTRUTURAS ANTERIORES
 drop table if exists pedidos;
 drop table if exists produtos;
 drop table if exists leads_potenciais;
 drop table if exists clientes;
 
--- 2. DDL: CRIAÇÃO DE TABELAS NORMALIZADAS COM CHAVES PRIMÁRIAS
 CREATE TABLE public.clientes (
 	id int NOT NULL,
 	nome varchar(50) NOT NULL,
@@ -26,7 +24,6 @@ CREATE TABLE public.leads_potenciais (
 	CONSTRAINT leads_potenciais_pkey PRIMARY KEY (id)
 );
 
--- 3. DDL: CRIAÇÃO DE TABELA COM CHAVES ESTRANGEIRAS (RELACIONAMENTOS)
 CREATE TABLE public.pedidos (
 	id int NOT NULL,
 	clienteid int NULL,
@@ -38,7 +35,6 @@ CREATE TABLE public.pedidos (
 	CONSTRAINT fk_produto_pedido FOREIGN KEY (produtoid) REFERENCES public.produtos(id)
 );
 
--- 4. DML: INSERÇÃO DE DADOS (INSERT)
 INSERT INTO Produtos (Id, NomeProduto, PrecoPadrao) VALUES
 (10, 'Notebook Pro', 4500.00),
 (11, 'Rato Sem Fio', 120.00),
@@ -62,8 +58,6 @@ INSERT INTO Leads_Potenciais (Id, Nome, Email) VALUES
 (2, 'João Pereira', 'joao@email.com'),     
 (3, 'Roberto Alves', 'roberto@test.com');  
 
--- 5. DQL AVANÇADO: JOINS (Combinação Horizontal)
--- Trazendo o nome do cliente, o produto comprado e o valor pago
 SELECT 
     c.nome AS Nome_Cliente,
     p.nomeproduto AS Produto,
@@ -72,15 +66,12 @@ FROM pedidos ped
 INNER JOIN clientes c ON ped.clienteid = c.id
 INNER JOIN produtos p ON ped.produtoid = p.id;
 
--- 6. DQL AVANÇADO: OPERADORES SET (Combinação Vertical)
--- Exemplo usando UNION para listar todos os nomes do banco (Clientes e Leads)
 SELECT Nome, 'Cliente' AS Categoria 
 FROM clientes
 UNION
 SELECT Nome, 'Lead' AS Categoria 
 FROM leads_potenciais;
 
--- Exemplo usando INTERSECT para descobrir quem é Cliente e também está na lista de Leads
 SELECT Nome FROM clientes
 INTERSECT
 SELECT Nome FROM leads_potenciais;
