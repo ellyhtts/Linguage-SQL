@@ -42,7 +42,6 @@ COMMIT; -- Efetiva permanentemente o pedido e os itens no banco
 
 ## DCL (Data Control Language)
 
-### Explicação Detalhada
 
 O **DCL** (Linguagem de Controle de Dados) trata exclusivamente de **Segurança e Acesso**. Ele define quem pode entrar no banco e o que cada usuário tem permissão de fazer, operando através de um sistema de concessão e revogação de privilégios em cima dos objetos (tabelas, views, procedures).
 
